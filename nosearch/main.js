@@ -77,6 +77,7 @@ define([
             handler: () => search(+1)};
         var name = Jupyter.actions.register(next, 'next', 'nosearch');
         Jupyter.keyboard_manager.edit_shortcuts.add_shortcut('ctrl-r', name);
+        Jupyter.keyboard_manager.command_shortcuts.add_shortcut('ctrl-r', name);
 
         var prev = {
             icon: 'fa-comment-plus-square', // a font-awesome class used on buttons, etc
@@ -85,6 +86,7 @@ define([
             handler: () => search(-1)};
         var name = Jupyter.actions.register(prev, 'prev', 'nosearch');
         Jupyter.keyboard_manager.edit_shortcuts.add_shortcut('ctrl-shift-r', name);
+        Jupyter.keyboard_manager.command_shortcuts.add_shortcut('ctrl-shift-r', name);
 
         var insert = {
             icon: 'fa-comment-plus-square', // a font-awesome class used on buttons, etc
@@ -93,6 +95,7 @@ define([
             handler: insert_result};
         var name = Jupyter.actions.register(insert, 'insert', 'nosearch');
         Jupyter.keyboard_manager.edit_shortcuts.add_shortcut('ctrl-alt-r', name);
+        Jupyter.keyboard_manager.command_shortcuts.add_shortcut('ctrl-alt-r', name);
     }
 
     function load_extension() {
