@@ -1,4 +1,6 @@
-Hit Ctrl+R in Jupyter Notebook to do a reverse history search. Ctrl+R again to move back further; Ctrl+Shift+R to move forward toward the present. Enter to accept the recovered command, or Esc or Ctrl+C to discard it. Anything else typed will refine the search. 
+Reverse search for Jupyter notebook cells, across your whole history.
+
+Hit Ctrl+R in Jupyter Notebook to do a reverse history search. Ctrl+R again to move back further; Ctrl+Shift+R to move forward toward the present. Ctrl+Alt+R to accept the recovered command. 
 
 ### Dev Install
 Clone the repo, then install it with:
