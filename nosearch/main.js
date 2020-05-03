@@ -40,18 +40,23 @@ define([
         }
     }
 
+    function pick(cache) {
+        if (cache.history.length) {
+            const index = cache.count % cache.history.length;
+            const text = cache.history[cache.history.length-1 - index][2];
+            return [index+1, text]
+        } else {
+            return [0, '']
+        }
+    }
+
     function search(inc) {
         const selected = Jupyter.notebook.get_selected_cell()
         const query = selected.get_text();
         fetch_history(query, inc, selected.cell_id).then(
             cache => {
-                let index = 0, one_index = 0, text = '';
-                if (cache.history.length) {
-                    index = cache.count % cache.history.length;
-                    one_index = index + 1;
-                    text = cache.history[index][2];
-                }
-                const content = query + ': ' + one_index + '/' + cache.history.length + '\n' + text;
+                const [index, text] = pick(cache);
+                const content = query + ': ' + index + '/' + cache.history.length + '\n' + text;
                 const json = {'output_type': 'stream', 'name': 'reverse-search', 'text': content} 
                 selected.output_area.clear_output();
                 selected.output_area.append_output(json); 
@@ -63,9 +68,7 @@ define([
         const selected = Jupyter.notebook.get_selected_cell()
         const cache = CACHE;
         if (selected.cell_id == cache.cell_id) {
-            const index = cache.count % cache.history.length;
-            const text = cache.history[index][2];
-
+            const [index, text] = pick(cache);
             selected.set_text(text);
             selected.output_area.clear_output();
         } 
@@ -97,8 +100,8 @@ define([
             help_index: 'zz',
             handler: insert_result};
         var name = Jupyter.actions.register(insert, 'insert', 'nosearch');
-        Jupyter.keyboard_manager.edit_shortcuts.add_shortcut('ctrl-alt-r', name);
-        Jupyter.keyboard_manager.command_shortcuts.add_shortcut('ctrl-alt-r', name);
+        Jupyter.keyboard_manager.edit_shortcuts.add_shortcut('ctrl-e', name);
+        Jupyter.keyboard_manager.command_shortcuts.add_shortcut('ctrl-e', name);
     }
 
     function load_extension() {
