@@ -45,10 +45,13 @@ define([
         const query = selected.get_text();
         fetch_history(query, inc, selected.cell_id).then(
             cache => {
-                const index = cache.count % cache.history.length;
-                const text = cache.history[index][2];
-
-                const content = query + ': #' + (index+1) + '/' + cache.history.length + '\n' + text;
+                let index = 0, one_index = 0, text = '';
+                if (cache.history.length) {
+                    index = cache.count % cache.history.length;
+                    one_index = index + 1;
+                    text = cache.history[index][2];
+                }
+                const content = query + ': ' + one_index + '/' + cache.history.length + '\n' + text;
                 const json = {'output_type': 'stream', 'name': 'reverse-search', 'text': content} 
                 selected.output_area.clear_output();
                 selected.output_area.append_output(json); 
