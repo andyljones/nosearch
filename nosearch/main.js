@@ -7,61 +7,63 @@ define([
 ], function($, events, Jupyter) {
     "use strict";
 
-    const SEARCH = {
-        cell_id: '',
-        query: '',
-    };
+    let CACHE = {};
 
-    function suggest(query, count) {
-        return new Promise((resolve, reject) => {
-            const callbacks = { shell: { reply: reply => { 
-                const history = reply.content.history;
-                if (history.length > 0) {
-                    const index = count % history.length
-                    resolve({text: history[index][2], index: index, length: history.length});
-                } else {
-                    resolve({text: '', index: index, length: 0});
-                }
-            }}};
+    function fetch_history(query, inc, cell_id) {
+        const previous = CACHE;
+        if ((query != previous.query) | (cell_id != previous.cell_id)) {
+            return new Promise((resolve, reject) => {
+                const callbacks = { shell: { reply: reply => { 
+                    const next = {
+                        cell_id: cell_id,
+                        query: query, 
+                        history: reply.content.history, 
+                        count: 0}
+                    CACHE = next;
+                    resolve(next);
+                }}};
 
-            Jupyter.notebook.kernel.send_shell_message('history_request', {
-                'output': false, 
-                'raw': true, 
-                'hist_access_type': 'search', 
-                'pattern': query + '*', 
-                'n': Math.max(100, count+1)}, 
-            callbacks); 
-        })
+                Jupyter.notebook.kernel.send_shell_message('history_request', {
+                    'output': false, 
+                    'raw': true, 
+                    'hist_access_type': 'search', 
+                    'pattern': query + '*', 
+                    'n': 100}, 
+                callbacks); 
+            });
+        } else {
+            return new Promise((resolve, reject) => { 
+                const next = Object.assign({}, previous); 
+                next.count += inc;
+                CACHE = next;
+                resolve(next); });
+        }
     }
 
     function search(inc) {
         const selected = Jupyter.notebook.get_selected_cell()
         const query = selected.get_text();
+        fetch_history(query, inc, selected.cell_id).then(
+            cache => {
+                const index = cache.count % cache.history.length;
+                const text = cache.history[index][2];
 
-        if ((selected.cell_id != SEARCH.cell_id) | (query != SEARCH.query)) {
-            SEARCH.cell_id = selected.cell_id;
-            SEARCH.query = query;
-            SEARCH.count = 0;
-            SEARCH.text = 'no result';
-        } else {
-            SEARCH.count += inc;
-        }
-
-        suggest(query, SEARCH.count)
-            .then(suggestion => {
-                selected.output_area.clear_output();
-                const content = query + ': #' + (suggestion.index+1) + '/' + suggestion.length + '\n' + suggestion.text;
+                const content = query + ': #' + (index+1) + '/' + cache.history.length + '\n' + text;
                 const json = {'output_type': 'stream', 'name': 'reverse-search', 'text': content} 
+                selected.output_area.clear_output();
                 selected.output_area.append_output(json); 
-                SEARCH.text = suggestion.text
-            })
+            }
+        )
     };
 
     function insert_result() {
         const selected = Jupyter.notebook.get_selected_cell()
+        const cache = CACHE;
+        if (selected.cell_id == cache.cell_id) {
+            const index = cache.count % cache.history.length;
+            const text = cache.history[index][2];
 
-        if (selected.cell_id == SEARCH.cell_id) {
-            selected.set_text(SEARCH.text);
+            selected.set_text(text);
             selected.output_area.clear_output();
         } 
     }
