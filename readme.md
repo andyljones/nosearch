@@ -4,6 +4,8 @@ Hit Ctrl+R in Jupyter Notebook to do a reverse history search. Ctrl+R again to m
 
 (Ctrl+E because Enter is used by the regular terminal, and it's next to R on QWERTY)
 
+<p align="center"><img alt="demo of selecting different inputs across history" src="demo.gif"></p>
+
 ### Dev Install
 Clone the repo, then install it with:
 ```
