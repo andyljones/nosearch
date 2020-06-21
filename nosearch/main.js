@@ -71,6 +71,7 @@ define([
             const [index, text] = pick(cache);
             selected.set_text(text);
             selected.output_area.clear_output();
+            CACHE = {};
         } 
     }
 
